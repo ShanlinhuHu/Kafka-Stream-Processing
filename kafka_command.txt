@@ -1,0 +1,33 @@
+
+# install these on EC2:
+# install Apache Kafka
+wget https://downloads.apache.org/kafka/3.5.1/kafka_2.12-3.5.1.tgz
+tar -xvf kafka_2.12-3.5.1.tgz
+
+# install java because of Kafka run on top of JVM
+sudo yum install java-1.8.0-openjdk
+
+# --------------------------------------------------------------------------------------
+
+# 1st terminal to start Zoo-keeper:
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+# 2nd terminal to start Kafka-server:
+# change ADVERTISED_LISTENERS to public ip of the EC2 instance
+sudo nano config/server.properties
+advertised.listeners = PLAINTEXT://3.143.226.208:9092
+
+# set JVM heap options for Kafka, max amount of memory that the JVM can allocate for objects,
+# when JVM starts, it will allocate this amount of memory immediately
+export KAFKA_HEAP_OPTS="-Xmx512M -Xms512M"
+
+bin/kafka-server-start.sh config/server.properties
+
+# create the topic:
+bin/kafka-topics.sh --create --topic Kafka_Real_Time_Data_Analysis_Covid_19_project --bootstrap-server 3.143.226.208:9092 --replication-factor 1 --partitions 1
+
+# 3rd terminal to start Producer:
+bin/kafka-console-producer.sh --topic Kafka_Real_Time_Data_Analysis_Covid_19_project --bootstrap-server 3.143.226.208:9092
+
+# 4th terminal to start Consumer:
+bin/kafka-console-consumer.sh --topic Kafka_Real_Time_Data_Analysis_Covid_19_project --bootstrap-server 3.143.226.208:9092
